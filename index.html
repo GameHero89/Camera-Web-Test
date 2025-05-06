@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kamera auswählen & Foto</title>
+  <title>Login & Kamera</title>
+  <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -11,37 +12,92 @@
 
     body {
       margin: 0;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #f4f4f4;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 90vh;
+      padding: 20px;
     }
 
     .container {
-      width: 95vi;
-      max-width: 600px;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
+    .main-container {
+        aspect-ratio: 9 / 16;
+  max-height: 100vh;
+  /*overflow: hidden; /* Verhindert das Überlaufen des Inhalts */
+    }
+
+    button {
+      margin: 10px;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    input {
+        margin: 10px;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
+      background-color: #0057b300;
+      color: white;
+      cursor: pointer;
+    }
+
+    .input-container {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 100%;
+  width: min(100%, 500px); /* oder: width: 100%; wenn main-container begrenzt ist */
+  padding: 0 10px;
+  z-index: 10;
+}
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
+      margin-bottom: 10px;
       text-align: center;
     }
 
-    label, select {
+    label {
+      font-size: 1.3rem;
+      margin: 10px 0 5px;
+    }
+
+    select {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+
+    #output {
+      margin-top: 10px;
       font-size: 1rem;
-      margin: 10px 0;
     }
 
     .video-wrapper {
       position: relative;
-      width: 90%;
+      width: 100%;
       margin-top: 10px;
-      
     }
 
     video, canvas {
@@ -53,42 +109,134 @@
 
     .hidden {
       display: none;
-      height: 0;
-      width: 0;
     }
 
     #snap {
       margin-top: 15px;
-      padding: 12px 20px;
-      font-size: 1.2rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    #snap:hover {
-      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Kamera auswählen & Foto machen</h1>
+    <div class="main-container">
+        <div class="container">
+            <h1>Microsoft Login</h1>
+            <button id="loginBtn" style="display: none;">Anmelden</button>
+            <button id="logoutBtn" style="display: none;">Abmelden</button>
+            <div id="output">Nicht eingeloggt</div>
+          </div>
+        
+         <div style="height: 30px;">
+            
+            </div>
 
-    <label for="cameraSelect">Kamera auswählen:</label>
-    <select id="cameraSelect"></select>
-
-    <div class="video-wrapper">
-      <video id="video" autoplay playsinline></video>
-      <canvas id="canvas" class="hidden"></canvas>
+          <div class="container" id="cameraSection" style="display: none;">
+            <label for="cameraSelect">Kamera auswählen:</label>
+            <select id="cameraSelect"></select>
+        
+            <div class="video-wrapper">
+              <video id="video" autoplay playsinline></video>
+              <canvas id="canvas" class="hidden"></canvas>
+            </div>
+        
+        
+            <div class="input-container">
+                <button id="snap">📸</button>
+                <input type="text" id="photoName" placeholder="Name des Fotos" style="width: 100vw;";/>
+                <button id="upload">⬆️</button>
+            </div>
+              
+        
+          </div>
     </div>
+  
 
-    <button id="snap">📸 Foto machen</button>
-  </div>
+  <script type="module">
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const output = document.getElementById("output");
+    const cameraSection = document.getElementById("cameraSection");
 
-  <script>
+    const currentPort = window.location.port;
+    const _redirectUri = `http://localhost:${currentPort}/`;
+
+    const msalConfig = {
+      auth: {
+        clientId: "9c1f5b8e-0a20-4fda-97ae-062a5aa7c71a",
+        authority: "https://login.microsoftonline.com/67ffefcf-69ec-414a-9ebd-63e6c9e852b6",
+        redirectUri: _redirectUri,
+      },
+      cache: {
+        cacheLocation: "sessionStorage",
+        storeAuthStateInCookie: true,
+      },
+    };
+
+    const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
+    loginBtn.addEventListener("click", () => {
+      myMSALObj.loginRedirect({ scopes: ["User.Read"] });
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      const account = myMSALObj.getActiveAccount();
+      if (account) {
+        myMSALObj.logoutRedirect({
+          account,
+          postLogoutRedirectUri: msalConfig.auth.redirectUri,
+        });
+      }
+    });
+
+    myMSALObj.handleRedirectPromise().then((loginResponse) => {
+      if (loginResponse) {
+        myMSALObj.setActiveAccount(loginResponse.account);
+      }
+
+      const account = myMSALObj.getAllAccounts()[0];
+      if (account) {
+        myMSALObj.setActiveAccount(account);
+        updateUI(true);
+        getProfileData();
+      } else {
+        updateUI(false);
+        loginBtn.style.display = "inline-block";
+      }
+    }).catch((error) => {
+      console.error("Fehler bei Redirect-Verarbeitung:", error);
+    });
+
+    function updateUI(isLoggedIn) {
+      loginBtn.style.display = isLoggedIn ? "none" : "inline-block";
+      logoutBtn.style.display = isLoggedIn ? "inline-block" : "none";
+      output.innerText = isLoggedIn ? "Benutzerdaten werden geladen..." : "Nicht eingeloggt";
+    }
+
+    function getProfileData() {
+      const account = myMSALObj.getActiveAccount();
+      if (!account) return;
+
+      myMSALObj.acquireTokenSilent({
+        scopes: ["User.Read"],
+        account,
+      }).then((response) => {
+        fetch("https://graph.microsoft.com/v1.0/me", {
+          headers: { Authorization: `Bearer ${response.accessToken}` },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            output.innerText = `Angemeldet als: ${data.displayName} (${data.userPrincipalName})`;
+            cameraSection.style.display = "flex";
+
+            // Scroll zum Kamera-Teil
+            setTimeout(() => {
+              document.getElementById("cameraSection").scrollIntoView({ behavior: "smooth" });
+              initCamera(); // Kamera initialisieren
+            }, 500);
+          });
+      });
+    }
+
+    // Kamera-Funktionalität
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
@@ -119,7 +267,7 @@
       const constraints = {
         video: {
           deviceId: deviceId ? { exact: deviceId } : undefined,
-          facingMode: "environment" // oder "user" für Frontkamera
+          //facingMode: "user"
         }
       };
 
@@ -128,19 +276,17 @@
         video.srcObject = stream;
         currentStream = stream;
 
-        video.addEventListener('loadedmetadata', () => {
-          adjustAspectRatio(video.videoWidth, video.videoHeight);
-        });
       } catch (error) {
         console.error("Kamera-Startfehler:", error);
-        alert("Fehler beim Starten der Kamera.");
+        //alert("Fehler beim Starten der Kamera.");
       }
     }
 
-    function adjustAspectRatio(width, height) {
-      const wrapper = document.querySelector('.video-wrapper');
-      const aspectRatio = height / width;
-      wrapper.style.maxheight = (aspectRatio * 90) + "%"; // responsive aspect ratio container
+    async function initCamera() {
+      await getCameras();
+      if (cameraSelect.options.length > 0) {
+        await startCamera(cameraSelect.value);
+      }
     }
 
     cameraSelect.addEventListener('change', () => {
@@ -154,24 +300,81 @@
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         video.classList.add("hidden");
         canvas.classList.remove("hidden");
-        snapBtn.textContent = "🗑️ Verwerfen";
+        snapBtn.textContent = "🗑️";
         hasFoto = true;
       } else {
         canvas.classList.add("hidden");
         video.classList.remove("hidden");
-        snapBtn.textContent = "📸 Foto machen";
+        snapBtn.textContent = "📸";
         hasFoto = false;
       }
     });
 
-    async function init() {
-      await getCameras();
-      if (cameraSelect.options.length > 0) {
-        startCamera(cameraSelect.value);
-      }
-    }
+    const uploadBtn = document.getElementById('upload');
 
-    init();
+    uploadBtn.addEventListener('click', async () => {
+  if (!hasFoto) {
+    alert("Bitte zuerst ein Foto machen.");
+    return;
+  }
+
+  const account = myMSALObj.getActiveAccount();
+  if (!account) {
+    alert("Nicht eingeloggt.");
+    return;
+  }
+
+  // Hole den vom Benutzer eingegebenen Namen
+  const photoName = document.getElementById("photoName").value.trim();
+  let fileName = photoName ? `${photoName}.jpg` : `Mitarbeiterfoto_${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`;
+
+  try {
+    const tokenResponse = await myMSALObj.acquireTokenSilent({
+      scopes: ["Files.ReadWrite.All", "User.Read"],
+      account,
+    });
+
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        await uploadToSharePoint(tokenResponse.accessToken, fileName, blob);
+      } else {
+        alert("Fehler beim Erstellen des Bildes.");
+      }
+    }, "image/jpeg", 0.95);
+
+  } catch (err) {
+    console.error("Tokenfehler:", err);
+    alert("Fehler beim Abrufen des Tokens.");
+  }
+});
+
+
+async function uploadToSharePoint(token, fileName, blob) {
+  const sharePointUrl = `https://graph.microsoft.com/v1.0/sites/chogroup.sharepoint.com,42acd890-94e7-4c28-8484-e86cd7be679a,ad4b0d36-71bc-4969-ab53-498215a2ba5b/drives/b!kNisQueUKEyEhOhs175nmjYNS628cWlJq1NJghWiulsbFLddzJZGSIIXbV-qebNM/root:/Mitarbeiterkarten/${fileName}:/content`;
+
+  try {
+    const response = await fetch(sharePointUrl, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/octet-stream"
+      },
+      body: blob
+    });
+
+    if (response.ok) {
+      alert("✅ Foto erfolgreich hochgeladen!");
+    } else {
+      const errorData = await response.json();
+      console.error("Fehler beim Upload:", errorData);
+      alert("❌ Fehler beim Hochladen.");
+    }
+  } catch (e) {
+    console.error("Upload-Fehler:", e);
+    alert("❌ Netzwerkfehler beim Hochladen.");
+  }
+}
+
   </script>
 </body>
 </html>
