@@ -13,11 +13,18 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      ;
+      background-color: #f1f1f1;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 20px;
+    }
+
+    .top-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
     }
 
     .container {
@@ -34,7 +41,7 @@
     }
 
     button {
-      margin: 10px;
+      margin: 5px;
       padding: 12px 20px;
       font-size: 1.1rem;
       border-radius: 8px;
@@ -46,35 +53,32 @@
 
     input {
       font-size: 0.8rem;
+      padding: 12px 20px;
+
       border-radius: 8px;
       border: none;
-      background-color: #0057b300;
-      color: white;
+      background-color: #ffffff;
+      color: rgb(66, 66, 66);
       cursor: pointer;
     }
 
+
     .input-container {
   position: fixed;
-  bottom: 10px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 100%;
-  width: 100%;
+  width: 90%;
   padding: 0px;
   z-index: 10;
+  
 }
 
-/* Mobile-Anpassung */
-@media (max-width: 600px) {
-  .input-container {
-    padding: 0px 0px;   /* Weniger Padding auf kleineren Geräten */
-    flex-direction: row; /* Falls du mehrere Elemente hast, die nebeneinander stehen */
-    gap: 10px;              /* Abstand zwischen den Elementen */
-  }
-}
+
 
 
     button:hover {
@@ -126,18 +130,16 @@
 </head>
 <body>
     <div class="main-container">
-        <div class="container">
-            <h1>Microsoft Login</h1>
+        <div class="top-container">
+            <label>
             <button id="loginBtn" style="display: none;">Anmelden</button>
             <button id="logoutBtn" style="display: none;">Abmelden</button>
             <div id="output">Nicht eingeloggt</div>
           </div>
-        
-         <div style="height: 30px;">
-            
-            </div>
 
           <div class="container" id="cameraSection" style="display: none;">
+
+
             <label for="cameraSelect">Kamera auswählen:</label>
             <select id="cameraSelect"></select>
         
@@ -171,7 +173,7 @@
       auth: {
         clientId: "9c1f5b8e-0a20-4fda-97ae-062a5aa7c71a",
         authority: "https://login.microsoftonline.com/67ffefcf-69ec-414a-9ebd-63e6c9e852b6",
-        redirectUri: /*_redirectUri/*/"https://gamehero89.github.io/Camera-Web-Test/",//_redirectUri,
+        redirectUri: _redirectUri/*"https://gamehero89.github.io/Camera-Web-Test/",*///_redirectUri,
       },
       cache: {
         cacheLocation: "sessionStorage",
@@ -232,7 +234,7 @@
         })
           .then((res) => res.json())
           .then((data) => {
-            output.innerText = `Angemeldet als: ${data.displayName} (${data.userPrincipalName})`;
+            output.innerText = `Angemeldet als: ${data.displayName}`;
             cameraSection.style.display = "flex";
 
             // Scroll zum Kamera-Teil
