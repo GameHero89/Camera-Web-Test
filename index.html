@@ -7,7 +7,10 @@
   <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
   <style>
     * {
-      box-sizing: border-box;
+      /* box-sizing: border-box; */
+      margin: 0;
+      padding: 0;
+      
     }
 
     body {
@@ -18,7 +21,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 0px;
     }
 
     .top-container {
@@ -37,6 +40,7 @@
     .main-container {
         aspect-ratio: 9 / 21;
   max-height: 100vh;
+  width: 95vw;
   /*overflow: hidden; /* Verhindert das Überlaufen des Inhalts */
     }
 
@@ -65,14 +69,14 @@
 
     .input-container {
   position: fixed;
-  bottom: 20px;
+  bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 100%;
-  width: 90%;
+  width: 100%;
   padding: 0px;
   z-index: 10;
   
@@ -151,7 +155,7 @@
         
             <div class="input-container">
                 <button id="snap">📸</button>
-                <input type="text" id="photoName" placeholder="Name des Fotos" style="width: 100vw;";/>
+                <input type="text" id="photoName" placeholder="Name des Fotos";/>
                 <button id="upload">⬆️</button>
             </div>
               
