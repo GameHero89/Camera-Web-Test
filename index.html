@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Kamera auswählen & Foto</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    
+
+    .container {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 500px;
+      height: 375px;
+      padding: 10;
+      margin: 10;
+    }
+
+    video, canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 500px;
+      height: 375px;
+      border: 1px solid #ccc;
+    }
+
+    .hidden {
+      visibility: hidden;
+    }
+
+    
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Kamera auswählen & Foto machen</h1>
+
+  <label for="cameraSelect">Kamera auswählen:</label>
+  <select id="cameraSelect"></select><br>
+
+  <div class="video-wrapper">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" class="hidden"></canvas>
+  </div>
+
+  <button id="snap">📸 Foto machen</button>
+</div>
+
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
+  const cameraSelect = document.getElementById('cameraSelect');
+  const snapBtn = document.getElementById('snap');
+
+  let hasFoto = false;
+  let currentStream;
+
+  async function getCameras() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+    cameraSelect.innerHTML = '';
+    videoDevices.forEach((device, index) => {
+      const option = document.createElement('option');
+      option.value = device.deviceId;
+      option.text = device.label || `Kamera ${index + 1}`;
+      cameraSelect.appendChild(option);
+    });
+  }
+
+  async function startCamera(deviceId) {
+    if (currentStream) {
+      currentStream.getTracks().forEach(track => track.stop());
+    }
+
+    const constraints = {
+      video: {
+        deviceId: deviceId ? { exact: deviceId } : undefined
+      }
+    };
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+      currentStream = stream;
+    } catch (error) {
+      console.error("Kamera-Startfehler:", error);
+      alert("Fehler beim Starten der Kamera.");
+    }
+  }
+
+  cameraSelect.addEventListener('change', () => {
+    startCamera(cameraSelect.value);
+  });
+
+  snapBtn.addEventListener('click', () => {
+    if (!hasFoto) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+      // Foto machen
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      video.classList.add("hidden");
+      canvas.classList.remove("hidden");
+      snapBtn.textContent = "🗑️ Verwerfen";
+      hasFoto = true;
+    } else {
+      // Foto verwerfen
+      canvas.classList.add("hidden");
+      video.classList.remove("hidden");
+      snapBtn.textContent = "📸 Foto machen";
+      hasFoto = false;
+    }
+  });
+
+  async function init() {
+    await getCameras();
+    if (cameraSelect.options.length > 0) {
+      startCamera(cameraSelect.value);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
