@@ -16,11 +16,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      height: 90vh;
     }
 
     .container {
-      width: 95vw;
+      width: 95vi;
       max-width: 600px;
       display: flex;
       flex-direction: column;
@@ -39,12 +39,13 @@
 
     .video-wrapper {
       position: relative;
-      width: 100%;
+      width: 90%;
       margin-top: 10px;
+      
     }
 
     video, canvas {
-      width: 100%;
+      width: 90%;
       height: auto;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -52,6 +53,8 @@
 
     .hidden {
       display: none;
+      height: 0;
+      width: 0;
     }
 
     #snap {
@@ -137,7 +140,7 @@
     function adjustAspectRatio(width, height) {
       const wrapper = document.querySelector('.video-wrapper');
       const aspectRatio = height / width;
-      wrapper.style.paddingTop = (aspectRatio * 100) + "%"; // responsive aspect ratio container
+      wrapper.style.maxheight = (aspectRatio * 90) + "%"; // responsive aspect ratio container
     }
 
     cameraSelect.addEventListener('change', () => {
