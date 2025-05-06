@@ -2,138 +2,173 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kamera auswählen & Foto</title>
   <style>
     * {
       box-sizing: border-box;
     }
 
-    
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
 
     .container {
-      height: 100vh;
-      width: 100vw;
+      width: 95vw;
+      max-width: 600px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    label, select {
+      font-size: 1rem;
+      margin: 10px 0;
     }
 
     .video-wrapper {
       position: relative;
-      width: 500px;
-      height: 375px;
-      padding: 10;
-      margin: 10;
+      width: 100%;
+      margin-top: 10px;
     }
 
     video, canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 500px;
-      height: 375px;
+      width: 100%;
+      height: auto;
       border: 1px solid #ccc;
+      border-radius: 8px;
     }
 
     .hidden {
-      visibility: hidden;
+      display: none;
     }
 
-    
+    #snap {
+      margin-top: 15px;
+      padding: 12px 20px;
+      font-size: 1.2rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #snap:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>Kamera auswählen & Foto machen</h1>
+  <div class="container">
+    <h1>Kamera auswählen & Foto machen</h1>
 
-  <label for="cameraSelect">Kamera auswählen:</label>
-  <select id="cameraSelect"></select><br>
+    <label for="cameraSelect">Kamera auswählen:</label>
+    <select id="cameraSelect"></select>
 
-  <div class="video-wrapper">
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" class="hidden"></canvas>
+    <div class="video-wrapper">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas" class="hidden"></canvas>
+    </div>
+
+    <button id="snap">📸 Foto machen</button>
   </div>
 
-  <button id="snap">📸 Foto machen</button>
-</div>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const snapBtn = document.getElementById('snap');
 
-<script>
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const context = canvas.getContext('2d');
-  const cameraSelect = document.getElementById('cameraSelect');
-  const snapBtn = document.getElementById('snap');
+    let hasFoto = false;
+    let currentStream;
 
-  let hasFoto = false;
-  let currentStream;
+    async function getCameras() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-  async function getCameras() {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-    cameraSelect.innerHTML = '';
-    videoDevices.forEach((device, index) => {
-      const option = document.createElement('option');
-      option.value = device.deviceId;
-      option.text = device.label || `Kamera ${index + 1}`;
-      cameraSelect.appendChild(option);
-    });
-  }
-
-  async function startCamera(deviceId) {
-    if (currentStream) {
-      currentStream.getTracks().forEach(track => track.stop());
+      cameraSelect.innerHTML = '';
+      videoDevices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Kamera ${index + 1}`;
+        cameraSelect.appendChild(option);
+      });
     }
 
-    const constraints = {
-      video: {
-        deviceId: deviceId ? { exact: deviceId } : undefined
+    async function startCamera(deviceId) {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
       }
-    };
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      video.srcObject = stream;
-      currentStream = stream;
-    } catch (error) {
-      console.error("Kamera-Startfehler:", error);
-      alert("Fehler beim Starten der Kamera.");
+      const constraints = {
+        video: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
+          facingMode: "environment" // oder "user" für Frontkamera
+        }
+      };
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+        currentStream = stream;
+
+        video.addEventListener('loadedmetadata', () => {
+          adjustAspectRatio(video.videoWidth, video.videoHeight);
+        });
+      } catch (error) {
+        console.error("Kamera-Startfehler:", error);
+        alert("Fehler beim Starten der Kamera.");
+      }
     }
-  }
 
-  cameraSelect.addEventListener('change', () => {
-    startCamera(cameraSelect.value);
-  });
+    function adjustAspectRatio(width, height) {
+      const wrapper = document.querySelector('.video-wrapper');
+      const aspectRatio = height / width;
+      wrapper.style.paddingTop = (aspectRatio * 100) + "%"; // responsive aspect ratio container
+    }
 
-  snapBtn.addEventListener('click', () => {
-    if (!hasFoto) {
+    cameraSelect.addEventListener('change', () => {
+      startCamera(cameraSelect.value);
+    });
+
+    snapBtn.addEventListener('click', () => {
+      if (!hasFoto) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        video.classList.add("hidden");
+        canvas.classList.remove("hidden");
+        snapBtn.textContent = "🗑️ Verwerfen";
+        hasFoto = true;
+      } else {
+        canvas.classList.add("hidden");
+        video.classList.remove("hidden");
+        snapBtn.textContent = "📸 Foto machen";
+        hasFoto = false;
+      }
+    });
 
-      // Foto machen
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      video.classList.add("hidden");
-      canvas.classList.remove("hidden");
-      snapBtn.textContent = "🗑️ Verwerfen";
-      hasFoto = true;
-    } else {
-      // Foto verwerfen
-      canvas.classList.add("hidden");
-      video.classList.remove("hidden");
-      snapBtn.textContent = "📸 Foto machen";
-      hasFoto = false;
+    async function init() {
+      await getCameras();
+      if (cameraSelect.options.length > 0) {
+        startCamera(cameraSelect.value);
+      }
     }
-  });
 
-  async function init() {
-    await getCameras();
-    if (cameraSelect.options.length > 0) {
-      startCamera(cameraSelect.value);
-    }
-  }
-
-  init();
-</script>
+    init();
+  </script>
 </body>
 </html>
