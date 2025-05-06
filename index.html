@@ -45,9 +45,7 @@
     }
 
     input {
-        margin: 10px;
-      padding: 12px 20px;
-      font-size: 1.1rem;
+      font-size: 0.8rem;
       border-radius: 8px;
       border: none;
       background-color: #0057b300;
@@ -64,11 +62,20 @@
   justify-content: space-between;
   align-items: center;
   max-width: 100%;
-  width: 100%; /* oder: width: 100%; wenn main-container begrenzt ist */
-  /*padding: 10px 10px;*/
-  padding: 30px;
+  width: 100%;
+  padding: 0px;
   z-index: 10;
 }
+
+/* Mobile-Anpassung */
+@media (max-width: 600px) {
+  .input-container {
+    padding: 0px 0px;   /* Weniger Padding auf kleineren Geräten */
+    flex-direction: row; /* Falls du mehrere Elemente hast, die nebeneinander stehen */
+    gap: 10px;              /* Abstand zwischen den Elementen */
+  }
+}
+
 
     button:hover {
       background-color: #0056b3;
@@ -164,7 +171,7 @@
       auth: {
         clientId: "9c1f5b8e-0a20-4fda-97ae-062a5aa7c71a",
         authority: "https://login.microsoftonline.com/67ffefcf-69ec-414a-9ebd-63e6c9e852b6",
-        redirectUri: "https://gamehero89.github.io/Camera-Web-Test/",//_redirectUri,
+        redirectUri: _redirectUri/*"https://gamehero89.github.io/Camera-Web-Test/",*///_redirectUri,
       },
       cache: {
         cacheLocation: "sessionStorage",
