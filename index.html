@@ -1,73 +1,148 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login & Kamera</title>
-  <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
-  <style>
-    * {
-      /* box-sizing: border-box; */
-      margin: 0;
-      padding: 0;
-      
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      ;
-      background-color: #f1f1f1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0px;
-    }
+    <title>Mobile App mit Seitenwechsel</title>
+    <style>
+        /* Grundlegende Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .top-container {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+        }
 
-    .container {
+        /* Seitencontainer */
+        .page {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* Startseite */
+        #startPage {
+            background: #f8f9fa;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .start-content {
+            padding: 20px;
+        }
+
+        /* Gemeinsame Header-Stile */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            /* z-index: 1000; */
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Chat Page (deine ursprüngliche Seite) */
+        #chatPage {
+            position: relative;
+        }
+
+        /* Restliche Styles von vorher */
+        .header.expanded {
+            height: 120px;
+        }
+
+        .auth-buttons {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .header.expanded .auth-buttons {
+            display: flex;
+        }
+
+        .content {
+            flex: 1;
+            margin-top: 60px;
+            margin-bottom: 70px;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f5f5;
+        }
+
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #fff;
+            padding: 15px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-evenly;
+            gap: 10px;
+        }
+
+        .video-wrapper {
+      position: relative;
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin-top: 10px;
     }
 
-    .main-container {
-        aspect-ratio: 9 / 21;
-  max-height: 100vh;
-  width: 95vw;
-  /*overflow: hidden; /* Verhindert das Überlaufen des Inhalts */
-    }
-
-    button {
-      margin: 5px;
-      padding: 12px 20px;
-      font-size: 1.1rem;
+    video, canvas {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      border: none;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
     }
 
-    input {
-      font-size: 0.8rem;
-      padding: 12px 20px;
+        .input-field {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            outline: none;
+        }
 
-      border-radius: 8px;
-      border: none;
-      background-color: #ffffff;
-      color: rgb(66, 66, 66);
-      cursor: pointer;
+        .btn {
+            scale: 1;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+    /*     @media (max-width: 480px) {
+    .btn {
+        min-width: 60px;
+        padding: 8px 12px;
     }
-
-
     .input-container {
+        padding: 10px;
+        gap: 5px;
+    } 
+} */
+
+.input-container {
   position: fixed;
   bottom: 5px;
   left: 50%;
@@ -82,90 +157,117 @@
   
 }
 
+        /* Zentrierter Sign-In Button */
+        #signInBtn {
+            margin-top: 20px;
+           /*  width: 200px; */
+        }
 
+        @media (min-width: 1200px) {
+            body {
+                max-width: 1000px;
+                margin: 0 auto;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            }
+            .input-container {
+                max-width: 1000px;
+            }
+        }
 
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    h1 {
-      font-size: 1.6rem;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-
-    label {
-      font-size: 1.3rem;
-      margin: 10px 0 5px;
-    }
-
-    select {
-      font-size: 1.1rem;
-      margin-bottom: 15px;
-    }
-
-    #output {
-      margin-top: 10px;
-      font-size: 1rem;
-    }
-
-    .video-wrapper {
-      position: relative;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    video, canvas {
-      width: 100%;
-      height: auto;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    .hidden {
+        .hidden {
       display: none;
     }
 
-    #snap {
-      margin-top: 15px;
+    .cameraSelect {
+        scale: 1.5;
     }
-  </style>
+
+    .camera-select-wrapper {
+        display: flex;
+        justify-content: center;
+    }
+
+    
+
+    </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="top-container">
-            <label>
-            <button id="loginBtn" style="display: none;">Anmelden</button>
-            <button id="logoutBtn" style="display: none;">Abmelden</button>
-            <div id="output">Nicht eingeloggt</div>
-          </div>
+    <!-- Startseite -->
+    <div id="startPage" class="page active">
+        <div class="header">
+            <h1>Willkommen</h1>
+        </div>
+        <div class="start-content">
+            <h2>Bitte anmelden</h2>
+            <button class="btn" id="signInBtn">Anmelden</button>
+        </div>
+    </div>
 
-          <div class="container" id="cameraSection" style="display: none;">
+    <!-- Chat Page -->
+    <div id="chatPage" class="page">
+        <header class="header" id="header">
+            <div class="header-content">
+                <h1>App Name</h1>
+                <button onclick="toggleHeader()">☰</button>
+            </div>
+            <div class="auth-buttons">
+                <button class="btn" id="logoutBtn">Abmelden</button>
+            </div>
+        </header>
 
+        <main class="content">
+          <!--   <div class="message">Willkommen zurück!</div>
+            <div class="message">Neue Nachricht</div>
+            <div class="message">Letzte Aktivität</div> -->
 
-            <label for="cameraSelect">Kamera auswählen:</label>
-            <select id="cameraSelect"></select>
-        
+            <div class="camera-select-wrapper">
+                <select id="cameraSelect"></select>
+            </div>
+
             <div class="video-wrapper">
+
               <video id="video" autoplay playsinline></video>
               <canvas id="canvas" class="hidden"></canvas>
             </div>
-        
-        
-            <div class="input-container">
-                <button id="snap">📸</button>
-                <input type="text" id="photoName" placeholder="Name des Fotos";/>
-                <button id="upload">⬆️</button>
-            </div>
-              
-        
-          </div>
-    </div>
-  
+        </main>
 
-  <script type="module">
-    const loginBtn = document.getElementById("loginBtn");
+        <div class="input-container">
+
+            <button class="btn" id="snap">📸</button>
+            <input type="text" class="input-field" placeholder="Name" id="photoName">
+            <button class="btn" id="upload">⬆️</button>
+        </div>
+    </div>
+
+    <script>
+        // Seitenwechsel Funktionen
+        function showChatPage() {
+            document.getElementById('startPage').classList.remove('active');
+            document.getElementById('chatPage').classList.add('active');
+            // Header zurücksetzen
+            const header = document.getElementById('header');
+            if(header.classList.contains('expanded')) {
+                toggleHeader();
+            }
+        }
+
+        function showStartPage() {
+            document.getElementById('chatPage').classList.remove('active');
+            document.getElementById('startPage').classList.add('active');
+        }
+
+        // Header Toggle Funktion
+        function toggleHeader() {
+            const header = document.getElementById('header');
+            header.classList.toggle('expanded');
+            
+            const content = document.querySelector('.content');
+            content.style.marginTop = header.classList.contains('expanded') ? '120px' : '60px';
+        }
+    </script>
+
+<script type="module">
+    const loginBtn = document.getElementById("signInBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const output = document.getElementById("output");
     const cameraSection = document.getElementById("cameraSection");
@@ -177,7 +279,7 @@
       auth: {
         clientId: "9c1f5b8e-0a20-4fda-97ae-062a5aa7c71a",
         authority: "https://login.microsoftonline.com/67ffefcf-69ec-414a-9ebd-63e6c9e852b6",
-        redirectUri: "https://gamehero89.github.io/Camera-Web-Test/",//_redirectUri,
+        redirectUri: /* "https://gamehero89.github.io/Camera-Web-Test/", */_redirectUri,
       },
       cache: {
         cacheLocation: "sessionStorage",
@@ -210,19 +312,20 @@
       if (account) {
         myMSALObj.setActiveAccount(account);
         updateUI(true);
+        showChatPage();
         getProfileData();
       } else {
         updateUI(false);
-        loginBtn.style.display = "inline-block";
+        /* loginBtn.style.display = "inline-block"; */
       }
     }).catch((error) => {
       console.error("Fehler bei Redirect-Verarbeitung:", error);
     });
 
     function updateUI(isLoggedIn) {
-      loginBtn.style.display = isLoggedIn ? "none" : "inline-block";
+      /* loginBtn.style.display = isLoggedIn ? "none" : "inline-block";
       logoutBtn.style.display = isLoggedIn ? "inline-block" : "none";
-      output.innerText = isLoggedIn ? "Benutzerdaten werden geladen..." : "Nicht eingeloggt";
+      output.innerText = isLoggedIn ? "Benutzerdaten werden geladen..." : "Nicht eingeloggt"; */
     }
 
     function getProfileData() {
@@ -238,12 +341,12 @@
         })
           .then((res) => res.json())
           .then((data) => {
-            output.innerText = `Angemeldet als: ${data.displayName}`;
-            cameraSection.style.display = "flex";
+            //output.innerText = `Angemeldet als: ${data.displayName}`;
+            //cameraSection.style.display = "flex";
 
             // Scroll zum Kamera-Teil
             setTimeout(() => {
-              document.getElementById("cameraSection").scrollIntoView({ behavior: "smooth" });
+              //document.getElementById("cameraSection").scrollIntoView({ behavior: "smooth" });
               initCamera(); // Kamera initialisieren
             }, 500);
           });
