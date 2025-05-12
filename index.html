@@ -401,8 +401,11 @@
 
       const constraints = {
         video: {
-          deviceId: deviceId ? { exact: deviceId } : undefined,
-          //facingMode: "user"
+          //deviceId: deviceId ? { exact: deviceId } : undefined,
+          height: {ideal: 1920},
+           width: {ideal: 1080}, 
+            
+          facingMode: "user"
         }
       };
 
