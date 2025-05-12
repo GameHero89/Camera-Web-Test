@@ -308,7 +308,7 @@
     const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
     loginBtn.addEventListener("click", () => {
-      myMSALObj.loginRedirect({ scopes: ["User.Read"] });
+      myMSALObj.loginRedirect({ scopes: ["Files.ReadWrite.All", "User.Read"] });
     });
 
     logoutBtn.addEventListener("click", () => {
