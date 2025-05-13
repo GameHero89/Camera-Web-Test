@@ -247,6 +247,9 @@
               <video id="video" autoplay playsinline></video>
               <canvas id="canvas" class="hidden"></canvas>
             </div>
+
+            <input type="range" id="brightnessSlider" min="0" max="2" step="0.01" value="1">
+<label for="brightnessSlider">Brightness</label>
         </main>
 
         <div class="input-container">
@@ -258,6 +261,16 @@
     </div>
 
     <script>
+          const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+  const slider = document.getElementById('brightnessSlider');
+
+  slider.addEventListener('input', () => {
+    const brightness = slider.value;
+    video.style.filter = `brightness(${brightness})`;
+    canvas.style.filter = `brightness(${brightness})`;
+  });
+        
         // Seitenwechsel Funktionen
         function showChatPage() {
             document.getElementById('startPage').classList.remove('active');
