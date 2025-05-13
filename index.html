@@ -291,41 +291,15 @@
 
 <script type="module">
 
-        // Seitenwechsel Funktionen
-        function showChatPage() {
-            document.getElementById('startPage').classList.remove('active');
-            document.getElementById('chatPage').classList.add('active');
-            // Header zurücksetzen
-            const header = document.getElementById('header');
-            if(header.classList.contains('expanded')) {
-                toggleHeader();
-            }
-        }
 
-        function showStartPage() {
-            document.getElementById('chatPage').classList.remove('active');
-            document.getElementById('startPage').classList.add('active');
-        }
-
-        // Header Toggle Funktion
-        function toggleHeader() {
-            const header = document.getElementById('header');
-            header.classList.toggle('expanded');
-            
-            const content = document.querySelector('.content');
-            content.style.marginTop = header.classList.contains('expanded') ? '120px' : '80px';
-        }
-    </script>
-
-<script type="module">
-
-    let originalImageData = null;
-let brightness = parseFloat(slider.value);
     
 const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
           const ctx = canvas.getContext('2d');
   const slider = document.getElementById('brightnessSlider');
+
+        let originalImageData = null;
+let brightness = parseFloat(slider.value);
 
 function debounce(func, wait) {
   let timeout;
