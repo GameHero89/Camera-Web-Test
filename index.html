@@ -248,7 +248,7 @@
               <canvas id="canvas" class="hidden"></canvas>
             </div>
 
-            <input type="range" id="brightnessSlider" min="0" max="2" step="0.01" value="1">
+            <input type="range" id="brightnessSlider" min="0" max="3" step="0.01" value="1.25">
 <label for="brightnessSlider">Brightness</label>
         </main>
 
@@ -498,11 +498,12 @@ function applyBrightness() {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
            // Originalpixels zwischenspeichern
   originalImageData = context.getImageData(0, 0, canvas.width, canvas.height);
-  //applyBrightness(); // erste Anwendung (falls slider != 1)
+ 
         video.classList.add("hidden");
         canvas.classList.remove("hidden");
         snapBtn.textContent = "🗑️";
         hasFoto = true;
+           applyBrightness(); // erste Anwendung (falls slider != 1)
       } else {
         canvas.classList.add("hidden");
         video.classList.remove("hidden");
