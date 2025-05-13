@@ -285,6 +285,7 @@
   slider.addEventListener('input', () => {
 
      try {
+         if (canvas.width != 0 && canvas.heigt != 0) {
     const brightness = slider.value;
     //video.style.filter = `brightness(${brightness})`;
     //canvas.style.filter = `brightness(${brightness})`;
@@ -292,9 +293,10 @@
     let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     adjustBrightnessGammaCorrected(frame, brightness);
     ctx.putImageData(frame, 0, 0);
+         }
      }
       catch (e) {
-      console.error("Fehler beim Brightness slider:", e);
+      alert("Fehler beim Brightness slider: " + e);
       }
       
   });
