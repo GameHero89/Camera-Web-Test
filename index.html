@@ -497,8 +497,8 @@ function applyBrightness() {
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
            // Originalpixels zwischenspeichern
-  originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  applyBrightness(); // erste Anwendung (falls slider != 1)
+  originalImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  //applyBrightness(); // erste Anwendung (falls slider != 1)
         video.classList.add("hidden");
         canvas.classList.remove("hidden");
         snapBtn.textContent = "🗑️";
